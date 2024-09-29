@@ -4,7 +4,7 @@
 #include<stdbool.h>
 
 char *decimalToHex(int decimal) {
-    static char hex_string[10];
+    static char hex_string[20];
     sprintf(hex_string, "%X", decimal);
     return hex_string;
 }

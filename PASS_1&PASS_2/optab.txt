@@ -1,5 +1,5 @@
 SUB	05 
-CMP     03
+CMP 03
 LDA	00
 STA	23
 ADD	01

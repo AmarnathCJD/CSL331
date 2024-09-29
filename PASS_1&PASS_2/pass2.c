@@ -21,8 +21,8 @@ void main() {
 
     FILE *input, *output, *symtab, *optab;
 
-    input = fopen("interm.txt", "r");
-    output = fopen("obj1.txt", "w");
+    input = fopen("intermediate.txt", "r");
+    output = fopen("object.txt", "w");
     symtab = fopen("symtab.txt", "r");
     optab = fopen("optab.txt", "r");
 

@@ -4,8 +4,8 @@
 <h2>Lab Cycles Included</h2>
 <p>The repository contains code for the following lab cycles:</p>
 <ul>
-    <li>**SIC Assembler (Pass 1 & Pass 2)**: Implementation of a two-pass assembler for the SIC assembly language, using C. This involves generating intermediate code, symbol tables, and object code.</li>
-    <li>**[Other lab cycles]** (Add the names of other lab cycles here).</li>
+    <li><b>SIC Assembler (Pass 1 & Pass 2)</b>: Implementation of a two-pass assembler for the SIC assembly language, using C. This involves generating intermediate code, symbol tables, and object code.</li>
+    <li>otw.</li>
 </ul>
 
 <h2>Getting Started</h2>

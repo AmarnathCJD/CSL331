@@ -1,4 +1,4 @@
-<h2>Project Description</h2>
+<h2>PASS 1 & PASS 2 SIC</h2>
 <p>This project implements a two-pass assembler for the SIC (Symbolic Instruction Code) assembly language. The assembler is written in C and consists of two files:</p>
 <ul>
     <li><strong>pass1.c:</strong> Performs the first pass of the assembly process. It reads the source program (<code>input.txt</code>) and the operation table (<code>optab.txt</code>). Pass 1 generates an intermediate file (<code>intermediate.txt</code>) and a symbol table (<code>symtab.txt</code>).</li>

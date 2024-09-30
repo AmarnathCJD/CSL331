@@ -37,8 +37,11 @@ void main() {
     start = strtol(operand, NULL, 16);
 
     while (!feof(input)) {
-        if (!(strcmp(opcode, "START") == 0 || strcmp(opcode, "END") == 0 || strcmp(opcode, "RESW") == 0 || strcmp(opcode, "RESB") == 0)) {
-            count++;
+        if(strcmp(opcode,"BYTE")==0){
+            count+=strlen(operand)-3;
+        }
+        if (!(strcmp(opcode, "START") == 0 || strcmp(opcode, "END") == 0 || strcmp(opcode, "RESW") == 0 || strcmp(opcode, "RESB") == 0 || strcmp(opcode,"BYTE")==0)) {
+            count+=3;
         }
 
         fscanf(input, "%s %s %s %s", loc, label, opcode, operand);
@@ -54,7 +57,7 @@ void main() {
     fscanf(input, "%s %s %s %s", loc, label, opcode, operand);
     fprintf(output, "H^%s^00%s^0000%d\n", label, operand, length);
 
-    fprintf(output, "T^00%s^%d^", operand, (count * 6) / 2);
+    fprintf(output, "T^00%s^%d^", operand,count);
 
     while (!feof(input)) {
         if (strcmp(opcode, "START") == 0 || strcmp(opcode, "END") == 0 || strcmp(opcode, "RESW") == 0 || strcmp(opcode, "RESB") == 0) {

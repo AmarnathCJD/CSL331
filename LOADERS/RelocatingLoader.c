@@ -148,7 +148,9 @@ int main() {
         fprintf(outFile, "%s\n", text_records[i]);
         char* token = strtok(text_records[i], " ");
         token = strtok(NULL, " ");
+        addr = hex_to_int(token);
         token = strtok(NULL, " ");
+   
         token = strtok(NULL, " ");
         while (token != NULL) {
             int len = strlen(token);

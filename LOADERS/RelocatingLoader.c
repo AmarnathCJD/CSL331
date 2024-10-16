@@ -31,19 +31,21 @@ char END[MAX_LINE_LENGTH];
 char text_records[MAX_LINE_LENGTH][MAX_LINE_LENGTH];
 int text_record_count = 0;
 
-void processHeader(char *line, int new_start, FILE *outFile) {
+int processHeader(char *line, int new_start, FILE *outFile) {
     char name[7];
     int length, old_start;
     sscanf(line, "H %s %X %d", name, &old_start, &length);
     
     int new_length = length + new_start;
     snprintf(HEADER, MAX_LINE_LENGTH, "H %s %06X %d", name, new_start, length);
+    return old_start;
 }
 
 void processText(char *line, int offset, FILE *outFile) {
     char rest_of_line[MAX_LINE_LENGTH];
     int address, size;
-    sscanf(line, "T %X %X %[^\n]", &address, &size, rest_of_line);
+    sscanf(line, "T %X %02X %[^\n]", &address, &size, rest_of_line);
+
     snprintf(text_records[text_record_count++], MAX_LINE_LENGTH, "T %06X %X %s", address + offset, size, rest_of_line);
 }
 
@@ -51,7 +53,6 @@ void processModification(char *line, FILE *outFile, int new_start) {
     char rest_of_line[MAX_LINE_LENGTH];
     int address, size;
     sscanf(line, "M %X %X %[^\n]", &address, &size, rest_of_line);
-
     FILE *file = fopen("input.txt", "r");
     if (!file) {
         printf("Error opening file.\n");
@@ -59,25 +60,36 @@ void processModification(char *line, FILE *outFile, int new_start) {
     }
 
     char line_buffer[MAX_LINE_LENGTH];
-    int count = 0;
+    int count = -1;
     char *to_replace = NULL;
 
     while (fgets(line_buffer, sizeof(line_buffer), file)) {
-        if (line_buffer[0] == 'T' && count < address) {
+        if (line_buffer[0] == 'T') {
             int text_address, text_size;
             char text_object_code[MAX_LINE_LENGTH];
             sscanf(line_buffer, "T %X %X %[^\n]", &text_address, &text_size, text_object_code);
-            char *token = strtok(text_object_code, " ");
-            count += strlen(token) / 2;
 
-            while (count < address) {
-                token = strtok(NULL, " ");
+            if (count < address) {
+                char *token = strtok(text_object_code, " ");
                 count += strlen(token) / 2;
+
+                while (count < address && token != NULL) {
+                    token = strtok(NULL, " ");
+                    if (token == NULL) {
+                        continue;
+                    }
+                    count += strlen(token) / 2;
+                }
+
+                if (count >= address) {
+                    to_replace = token;
+                    printf("Relocating: %s ...\n", to_replace);
+                    break;
+                }
             }
-            to_replace = token;
-            break;
         }
     }
+
 
     fclose(file);
 
@@ -104,6 +116,7 @@ int main() {
 
     FILE *inFile = fopen("input.txt", "r");
     FILE *outFile = fopen("output.txt", "w");
+    FILE *outFile2 = fopen("memory.txt", "w");
     if (inFile == NULL || outFile == NULL) {
         printf("Error opening file.\n");
         return 1;
@@ -111,16 +124,17 @@ int main() {
 
     char line[MAX_LINE_LENGTH];
     int new_start;
+    int old_start;
 
     printf("Enter new starting address (hex): ");
     scanf("%X", &new_start);
 
-    // Read input file line by line
     while (fgets(line, sizeof(line), inFile)) {
         if (line[0] == 'H') {
-            processHeader(line, new_start, outFile);
+            old_start = processHeader(line, new_start, outFile);
         } else if (line[0] == 'T') {
-            processText(line, new_start - 0x1000, outFile); // change 0x1000 to the original starting address
+            int diff = new_start - old_start;
+            processText(line, diff, outFile);
         } else if (line[0] == 'M') {
             processModification(line, outFile, new_start);
         } else if (line[0] == 'E') {
@@ -129,14 +143,30 @@ int main() {
     }
 
     fprintf(outFile, "%s\n", HEADER);
+    int addr = new_start;
     for (int i = 0; i < text_record_count; i++) {
         fprintf(outFile, "%s\n", text_records[i]);
+        char* token = strtok(text_records[i], " ");
+        token = strtok(NULL, " ");
+        token = strtok(NULL, " ");
+        token = strtok(NULL, " ");
+        while (token != NULL) {
+            int len = strlen(token);
+            while (len > 0) {
+                fprintf(outFile2, "%06X %c%c\n", addr, token[0], token[1]);
+                addr++;
+                len -= 2;
+                token += 2;
+            }
+
+            token = strtok(NULL, " ");
+        }
     }
     fprintf(outFile, "%s", END);
 
     fclose(inFile);
     fclose(outFile);
 
-    printf("Relocation completed. Output written to output.txt\n");
+    printf("Relocation completed. Output written to output.txt and memory.txt.\n");
     return 0;
 }

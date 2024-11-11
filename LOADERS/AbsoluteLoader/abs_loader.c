@@ -1,51 +1,32 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<stdbool.h>
 
 void main() {
-    char buffer[20];
-    char listing_line[200];
-    int starting_address = 0;
+    FILE *inp, *out;
+    inp = fopen("input.txt", "r");
+    out = fopen("out.txt", "w");
 
-    FILE *input_file;
+    char line[100];
+    fgets(line, 100, inp);
 
-    input_file = fopen("input.txt", "r");
-
-    if (input_file == NULL) {
-        printf("Error! File not found.");
-        exit(0);
-    }
-
-    fseek(input_file, 7, SEEK_SET);
-    fgets(buffer, 7, input_file);
-    starting_address = atoi(buffer);
-    printf("starting address: %d\n", starting_address);
-
-    printf("\n\n");
-
-    rewind(input_file);
-    fscanf(input_file, "%s", listing_line);
-
-    while (listing_line[0] != 'E') {
-        if (listing_line[0] == 'T') {
-            int line_length = strlen(listing_line);
-
-            for (int i = 12; i < line_length; i++) {
-                if (listing_line[i] == '^') {
-                    continue;
+    while (!feof(inp)) {
+        int i = 0;
+        if (line[0] == 'T') {
+            int start = 0;
+            char *token = strtok(line, "^");
+            while (token != NULL) {
+                if (i == 1) {
+                    start = strtol(token, NULL, 16);
+                } else if (i != 0 && i != 2) {
+                    fprintf(out, "%X:%s\n", start, token);
+                    start += strlen(token) / 2;
                 }
-
-                printf("%d : %c%c", starting_address, listing_line[i], listing_line[i + 1]);
-                printf("\n");
-
+                token = strtok(NULL, "^");
                 i++;
-                starting_address++;
             }
-            printf("\n");
         }
-
-        fscanf(input_file, "%s", listing_line);
+        fgets(line, 100, inp);
     }
-
-    fclose(input_file);
 }
